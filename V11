@@ -1,0 +1,396 @@
+//V11 adding analogwrite to buttons
+
+
+#include <Adafruit_NeoPixel.h>
+#define LED_PIN    2
+#define LED_COUNT 70
+
+// Declare our NeoPixel strip object:
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+int B = 7;
+int T = 26;
+int l = 0;
+int r = 69;
+int j=0;
+int l2 = 0;
+int r2 = 35;
+int Red = 100;
+int Blue = 0;
+int Green = 0;
+int Bright = 2;
+int Speed = 2;
+int Mode = 6;
+int Colors = 1;
+int buttonColor=1;
+int buttonSpeed=1;
+int buttonMode=1;
+int buttonBright=1;
+void setup() {
+    Serial.begin(9600);
+  pinMode(17, OUTPUT);  
+  pinMode(3, INPUT_PULLUP);  //color
+  pinMode(4, INPUT_PULLUP);  //speed
+  pinMode(5, INPUT_PULLUP);    //mode
+  pinMode(6, INPUT_PULLUP);    //bright
+  // put your setup code here, to run once:
+  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  strip.show();            // Turn OFF all pixels ASAP
+  strip.setBrightness(250);
+}
+
+void loop() {
+  switch (Mode){
+case 1:
+    rainbow(3*Speed);
+    break;
+case 2:
+    fullChaser();
+    break;
+case 3:
+Serial.println("Color chase");
+     for(int i=0; i<strip.numPixels(); i++) { 
+    strip.setPixelColor(i, Red, Green, Blue);        
+    strip.show();
+    checkButtons();
+    delay(20 * Speed);                           
+  }
+  
+  for(int i=0; i<strip.numPixels(); i++) { 
+    strip.setPixelColor(i, 0, 0, 0);         
+    strip.show();
+    checkButtons();                          
+    delay(20 * Speed);                           
+  }
+    break;
+case 4:
+     yinYang(); 
+     break;
+  case 5:
+     L2R(); 
+     break;
+  case 6:
+     topDown(34,35); 
+     break;
+   case 7:
+     Pulse(); 
+     break;
+   case 8:
+     rainbowPulse(); 
+     break;
+  }
+}
+
+void rainbow(int wait) {
+  if (Mode ==1);{
+  strip.setBrightness(Bright*50);
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    for(int i=0; i<strip.numPixels(); i++) { 
+      int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
+    }
+    strip.show(); 
+    checkButtons();
+    if (Mode != 1){break;}
+    delay(wait);
+  }
+}
+}
+void checkButtons(){
+  buttonColor = digitalRead(3);
+  buttonSpeed = digitalRead(4);
+  buttonMode = digitalRead(5);
+  buttonBright = digitalRead(6);
+  if (buttonColor ==0 ){
+    
+    if(Colors<4){Colors=Colors+1;}
+    else{Colors=1;}
+    Serial.print("Colors=");
+    Serial.println(Colors);
+      switch (Colors){
+case 1:
+Red = Bright*50;
+Green = 0;
+Blue = 0;
+break;
+case 2:
+Red = 0;
+Green = Bright*50;
+Blue = 0;
+break;
+case 3:
+Red = 0;
+Green = 0;
+Blue = Bright*50;
+break;
+case 4:
+Red = Bright*50;
+Green = Bright*50;
+Blue = Bright*50;
+break;  
+  }
+    analogWrite(14,255);
+    delay(900);
+    analogWrite(14,0);
+  }
+    if (buttonSpeed ==0 ){
+    Serial.println("Speed Change");
+    if (Speed < 8) {Speed = Speed+2;
+    Serial.print("Speed= ");
+    Serial.println(Speed);
+    analogWrite(15,255);
+    delay(900);
+    analogWrite(15,0);
+  } 
+  else {Speed = 1;}
+    }
+    if (buttonMode ==0 ){
+    Serial.print("Mode Changed");
+   for(int i=0; i<strip.numPixels(); i++) { 
+    strip.setPixelColor(i, 0, 0, 0);}        
+    strip.show();
+    analogWrite(16,255);
+    delay(900);
+    analogWrite(16,0);
+   if (Mode < 8) {Mode = Mode+1;
+   Serial.print("Mode =");
+   Serial.println(Mode);
+  } 
+  else {Mode = 1;}
+  }
+    if (buttonBright ==0 ){
+    analogWrite(17,255);
+    delay(900);
+    analogWrite(17,0);
+    if (Bright < 5) {Bright = Bright+1;
+    Serial.print("Bright change= ");
+    Serial.println(Bright);
+  } 
+  else {Bright = 1;}
+  switch (Colors){
+case 1:
+Red = Bright*50;
+Green = 0;
+Blue = 0;
+break;
+case 2:
+Red = 0;
+Green = Bright*50;
+Blue = 0;
+break;
+case 3:
+Red = 0;
+Green = 0;
+Blue = Bright*50;
+break;
+case 4:
+Red = Bright*50;
+Green = Bright*50;
+Blue = Bright*50;
+break;  
+  }}
+  }
+  void fullChaser(){
+    if (Mode ==2){
+  if (l<10){
+strip.setPixelColor(l, Red, Green, Blue);
+strip.setPixelColor(l-9, 0, 0, 0);
+strip.setPixelColor(l+61, 0, 0, 0);
+  l++;
+  strip.show();
+}
+if ((l>=10) and (l<60)){
+strip.setPixelColor(l, Red, Green, Blue);
+strip.setPixelColor(l-9, 0, 0, 0);
+  l++;
+  strip.show();
+}
+if (l>=60) {
+strip.setPixelColor(l, Red, Green, Blue);
+strip.setPixelColor(l-69, Red, Green, Blue);
+strip.setPixelColor(l-9, 0, 0, 0);
+  l++;
+  strip.show();
+}
+checkButtons();
+delay(10*Speed);
+if(l ==70){
+  l=0;
+  }
+  }
+  }
+void yinYang(){
+    if (Mode==4){
+if (l2 <44 ) {
+  checkButtons();
+}
+strip.setPixelColor(l2, Red, Blue, Green);
+strip.setPixelColor(l2-10, 0, 0, 0);
+  l2++;
+  strip.show();
+}
+  if (r2 < 85) {
+    checkButtons();
+strip.setPixelColor(r2, Green, Red, Blue);
+strip.setPixelColor(r2-10, 0, 0, 0);
+  r2++;
+  strip.show();
+}
+delay(Speed * 10);
+if(r2 ==85){
+  r2=35;
+  l2=0;
+  }
+  }
+  void L2R(){
+    if (Mode ==5){
+ if (T <42 ) {
+strip.setPixelColor(T, Blue, Green, Red);
+strip.setPixelColor(T-8, 0, 0, 0);
+  T++;
+ // strip.show();
+  //delay(100);
+} 
+else if (T<50){
+ strip.setPixelColor(T-8, 0, 0, 0);
+  T++;
+ // strip.show();
+ // delay(100); 
+}
+ if ((B>=0) and (B < 8)) {
+strip.setPixelColor(B, Green, Red, Blue);
+strip.setPixelColor(B+8, 0, 0, 0);
+  B--;
+}
+else if ((B<0)and(B>-9)){
+strip.setPixelColor(B+70, Green, Red, Blue);
+strip.setPixelColor(B+8, 0, 0, 0);
+B--;
+}
+else if ((B<=-9)and(B>-17)){
+strip.setPixelColor(B+78, 0, 0, 0);
+B--;
+}
+strip.show();
+checkButtons();
+delay(10*Speed);
+if(B ==-17){
+  B=7;
+  T=26;
+  }}
+  }
+  void topDown(int l, int r){
+  while(Mode==6){
+if (l >-1 ) {
+ // Serial.println(l);
+strip.setPixelColor(l, Red, Green, Blue);
+strip.show();
+  l--;
+}
+  if (r < 70) {
+strip.setPixelColor(r, Blue, Red, Green);
+  r++;
+}
+strip.show();
+checkButtons();
+delay(10* Speed);
+if(r==70){
+  l=34;
+  r=35;
+  while(l>-1){
+  strip.setPixelColor(l, 0,0,0);
+  l--;
+  strip.setPixelColor(r, 0,0,0);
+  r++;
+strip.show();
+checkButtons();
+  delay(10* Speed);
+  }
+  l=34;
+  r=35;
+}}
+}
+void Pulse(){if (Mode==7){  if (Colors==1){
+  while(j<Red-1){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,j,0,0);}
+  j++;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}
+  while(j>0){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,j,0,0);}
+  j--;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}}
+  if (Colors==2){
+  while(j<Green-1){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,0,j,0);}
+  j++;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}
+  while(j>0){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,0,j,0);}
+  j--;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}}
+  if (Colors==3){
+  while(j<Blue-1){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,0,0,j);}
+  j++;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}
+  while(j>0){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,0,0,j);}
+  j--;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}}
+  if (Colors==4){
+  while(j<Blue-1){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,j,j,j);}
+  j++;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}
+  while(j>0){
+for(int i=0; i<strip.numPixels(); i++){
+  strip.setPixelColor(i,j,j,j);}
+  j--;
+  strip.show();
+  checkButtons();
+delay(2*Speed);
+}
+checkButtons();
+delay(250*Speed);}}
+}
+void rainbowPulse(){
+    if (Mode ==8){
+  strip.setBrightness(Bright*50);
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    if (Mode ==8){
+    for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+
+      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(firstPixelHue)));
+    }
+    strip.show(); // Update strip with new contents
+    checkButtons();
+    delay(5*Speed);  // Pause for a moment
+    }}}
+}
